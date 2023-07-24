@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  db:
+    ports:
+      - "5440:5432"
+    image: postgres
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: dsadsa
+
+  pgadmin:
+    restart: unless-stopped
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    volumes:
+      - ./.pgadmin:/root/.pgadmin
+    links:
+      - db
+    ports:
+      - "5052:80"
+    depends_on:
+      - db
+
+  api:
+    restart: unless-stopped
+    depends_on:
+      - db
+      - pgadmin
+
+    ports:
+      - "3002:80"
+    command: /start-reload.sh
+
+    volumes:
+      - .:/app
+    build:
+      context: .
+      dockerfile: "./Dockerfile"
+
+    environment:
+      DB_HOST: "db"
+      DB_USER: "postgres"
+      DB_PASSWORD: "dsadsa"
+      DB_PORT: 5432
+      APP_NAME: "garage"
+      DB_NAME: "garage_db"
+
+
+  pytest:
+    depends_on:
+      - db
+
+    command: pytest
+    build:
+      context: .
+      dockerfile: "./Dockerfile"
+    volumes:
+      - .:/app
+    
+    environment:
+      APP_NAME: "garage"
+      ENVIRONMENT: "testing"
+      DB_HOST: "db"
+      DB_USER: "postgres"
+      DB_PASSWORD: "dsadsa"
+      DB_PORT: 5432
+      DB_NAME: "garage_testing"
+
+
+volumes:
+  minio:
+  postgres:

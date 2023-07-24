@@ -1,0 +1,22 @@
+-r ./requirements.txt
+
+watchdog[watchmedo]
+
+black
+isort
+
+
+types-requests
+types-cachetools
+types-redis
+
+pip-tools
+
+# [ TEST ] 
+pytest
+asphalt
+mypy
+time-machine
+httpx
+pytest_postgresql # for janitor
+psycopg[binary] # for janitor
